@@ -17,6 +17,7 @@ try{
   assert.equal(r.body.calls.email.length,['normal','unknown'].includes(mode)?1:0);assert.equal(r.body.calls.token,['normal','unknown'].includes(mode)?1:0);checks++
   if(mode==='normal'){const m=r.body.calls.email[0];assert.equal(m.to,'contact@hat-tech.co.jp');assert.equal(m.replyTo,'person@example.com');assert.equal(m.html,undefined);assert.equal(r.headers.get('cache-control'),'no-store')}
  }
+ for(const [mode,status] of [['widget-extended',202],['widget-without-default',202],['widget-missing',503]]){const r=await request(mode);assert.equal(r.status,status,mode);assert.equal(r.body.calls.verify,status===202?1:0);assert.equal(r.body.calls.email.length,status===202?1:0);checks++}
  for(const mode of ['token-error','token-redirect','token-huge','token-invalid','graph-redirect','graph-reject']){
   const id=crypto.randomUUID(),r=await request(mode,{submissionId:id});assert.equal(r.status,503,mode)
   assert.equal(r.body.code,'outcome_unknown_do_not_resend');assert.equal(r.body.calls.token,1)

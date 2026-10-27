@@ -94,6 +94,7 @@ fn thirteen_sites_fit_each_variable_even_with_policy_commits() {
         serde_json::from_str(include_str!("../config/sites.example.json")).unwrap();
     assert_eq!(rows.len(), 13);
     for row in &mut rows {
+        row["turnstileSecretBinding"] = json!("TURNSTILE_SECRET_EXTENDED");
         row["enabled"] = json!(true);
         row["policyVersion"] = json!(format!(
             "urn:coela:legal:organization:site-operator:privacy-policy@{}",
@@ -158,4 +159,36 @@ fn email_modes_are_server_owned_and_default_to_required() {
         })
         .is_err()
     );
+}
+
+#[test]
+fn turnstile_binding_is_server_owned_bounded_and_backwards_compatible() {
+    for (value, accepted) in [
+        (None, true),
+        (Some("TURNSTILE_SECRET_EXTENDED"), true),
+        (Some("GRAPH_CLIENT_SECRET"), false),
+        (Some("IP_KEY_SECRET"), false),
+        (Some("TURNSTILE_SECRET_"), false),
+        (Some("TURNSTILE_SECRET_lowercase"), false),
+        (Some("TURNSTILE_SECRET_../OTHER"), false),
+    ] {
+        let mut rows = entries();
+        if let Some(value) = value {
+            rows[0]["turnstileSecretBinding"] = json!(value);
+        }
+        let text = rows.to_string();
+        let result = parse(Variables {
+            accepting: "true",
+            sites: &text,
+            network: "{}",
+            site_networks: "{}",
+        });
+        assert_eq!(result.is_ok(), accepted);
+        if let Ok(settings) = result {
+            assert_eq!(
+                settings.sites[0].turnstile_secret_binding,
+                value.unwrap_or("TURNSTILE_SECRET")
+            );
+        }
+    }
 }
