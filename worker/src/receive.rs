@@ -90,7 +90,10 @@ pub async fn submit(
         Ok(s) => s,
         Err(_) => return reply(400, "invalid_submission", o),
     };
-    if input.site_key != site.site_key || input.policy_version != site.policy_version {
+    if input.site_key != site.site_key
+        || input.policy_version != site.policy_version
+        || !site.email_mode.accepts(&input.email)
+    {
         return reply(400, "invalid_submission", o);
     }
     crate::delivery::deliver(site, &input, &secret, receipts, email).await

@@ -34,14 +34,16 @@ pub async fn deliver(
         "Receipt: {}\nPolicy: {}\nSubject: {}\n\n{}",
         input.submission_id, input.policy_version, input.subject, input.message
     );
-    let message = SendEmailBuilder::builder(
+    let mut message = SendEmailBuilder::builder(
         &site.from,
         &site.to,
         &format!("Website contact: {}", site.site_key),
     )
-    .reply_to(&input.email)
-    .text(&text)
-    .build();
+    .text(&text);
+    if !input.email.is_empty() {
+        message = message.reply_to(&input.email);
+    }
+    let message = message.build();
     let sent = deadline(
         async { email.send_with_builder(&message).await.map_err(Error::from) },
         6000,

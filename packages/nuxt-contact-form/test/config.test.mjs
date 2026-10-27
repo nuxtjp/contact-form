@@ -12,3 +12,9 @@ test('live mode requires pinned policy, secure endpoint and a safe privacy link'
  assert.equal(validPrivacyUrl('https://example.com/privacy/'),true)
  for(const url of ['//other.example/privacy','data:text/html,x','https://user:pass@example.com/privacy/'])assert.equal(validPrivacyUrl(url),false)
 })
+
+test('email collection mode is explicit and defaults to required',()=>{
+ assert.equal(publicOptions({}).emailMode,'required')
+ for(const emailMode of ['required','optional','disabled'])assert.equal(publicOptions({emailMode}).emailMode,emailMode)
+ for(const emailMode of ['anonymous',true,null])assert.throws(()=>publicOptions({emailMode}))
+})

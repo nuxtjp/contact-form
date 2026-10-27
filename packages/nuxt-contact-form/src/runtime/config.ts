@@ -1,4 +1,5 @@
 export interface ModuleOptions {
+ emailMode: 'required' | 'optional' | 'disabled'
  mode: 'preview' | 'live'
  endpoint: string
  siteKey: string
@@ -7,7 +8,7 @@ export interface ModuleOptions {
  privacyUrl: string
 }
 export const defaultOptions: ModuleOptions = {
- mode: 'preview', endpoint: '', siteKey: '', turnstileSiteKey: '', policyVersion: '', privacyUrl: ''
+ emailMode: 'required', mode: 'preview', endpoint: '', siteKey: '', turnstileSiteKey: '', policyVersion: '', privacyUrl: ''
 }
 
 export function validPrivacyUrl(value: string): boolean {
@@ -25,6 +26,7 @@ export function publicOptions(input: unknown): ModuleOptions {
   if (fields[key] !== undefined && typeof fields[key] !== 'string') throw new Error('Invalid contact form option')
  }
  Object.assign(options, fields)
+ if (!['required', 'optional', 'disabled'].includes(options.emailMode)) throw new Error('Invalid email mode')
  if (!['preview', 'live'].includes(options.mode)) throw new Error('Invalid contact form mode')
  if (options.mode === 'live') {
   const url = new URL(options.endpoint)

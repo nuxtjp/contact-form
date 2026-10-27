@@ -121,3 +121,49 @@ fn thirteen_sites_fit_each_variable_even_with_policy_commits() {
         13
     );
 }
+
+#[test]
+fn email_modes_are_server_owned_and_default_to_required() {
+    for (mode, empty, provided) in [
+        (None, false, true),
+        (Some("required"), false, true),
+        (Some("optional"), true, true),
+        (Some("disabled"), true, false),
+    ] {
+        let mut rows = entries();
+        if let Some(mode) = mode {
+            rows[0]["emailMode"] = json!(mode);
+        }
+        let text = rows.to_string();
+        let c = parse(Variables {
+            accepting: "true",
+            sites: &text,
+            sender: "forms@notify.example.com",
+            network: "{}",
+            site_networks: "{}",
+        })
+        .unwrap();
+        assert_eq!(c.sites[0].email_mode.accepts(""), empty);
+        assert_eq!(
+            c.sites[0].email_mode.accepts("person@example.com"),
+            provided
+        );
+        assert!(
+            !c.sites[0]
+                .email_mode
+                .accepts("bad\r\nBcc: victim@example.com")
+        );
+    }
+    let mut rows = entries();
+    rows[0]["emailMode"] = json!("anonymous");
+    assert!(
+        parse(Variables {
+            accepting: "true",
+            sites: &rows.to_string(),
+            sender: "forms@notify.example.com",
+            network: "{}",
+            site_networks: "{}"
+        })
+        .is_err()
+    );
+}
