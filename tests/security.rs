@@ -11,7 +11,7 @@ fn sites(text: &str) -> Result<Vec<Site>, &'static str> {
     config::parse(Variables {
         accepting: "true",
         sites: text,
-        sender: "forms@notify.example.com",
+
         network: "{}",
         site_networks: "{}",
     })

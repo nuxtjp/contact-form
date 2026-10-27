@@ -377,7 +377,7 @@ dependencies = [
 
 [[package]]
 name = "nuxtjp-contact-worker"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "futures-util",
  "hmac",
@@ -388,6 +388,8 @@ dependencies = [
  "url",
  "wasm-streams",
  "worker",
+ "zeroize",
+ "zixcel-microsoft-mail",
 ]
 
 [[package]]
@@ -866,6 +868,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "zeroize"
+version = "1.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879"
+
+[[package]]
 name = "zerotrie"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -896,6 +904,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.9",
+]
+
+[[package]]
+name = "zixcel-microsoft-mail"
+version = "0.1.0"
+source = "git+https://github.com/zixcel/zixcel-microsoft?rev=c310e59be1a85ce2db5d58ea60f6ba366b466217#c310e59be1a85ce2db5d58ea60f6ba366b466217"
+dependencies = [
+ "serde",
+ "serde_json",
+ "url",
+ "zeroize",
 ]
 
 [[package]]

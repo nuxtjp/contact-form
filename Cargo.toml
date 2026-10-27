@@ -1,6 +1,6 @@
 [package]
 name = "nuxtjp-contact-worker"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.91"
 license = "Apache-2.0"
@@ -16,9 +16,11 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.150", features = ["raw_value"] }
 ipnet = { version = "2.12.2", features = ["serde"] }
 url = "2.5.8"
+zixcel-microsoft-mail = { git = "https://github.com/zixcel/zixcel-microsoft", rev = "c310e59be1a85ce2db5d58ea60f6ba366b466217", version = "=0.1.0" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 worker = "=0.8.7"
+zeroize = "1"
 wasm-streams = "=0.7.0"
 hmac = "0.12.1"
 sha2 = "0.10.9"

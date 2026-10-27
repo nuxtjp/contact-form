@@ -1,7 +1,8 @@
 # Contact form
 
-A standalone Nuxt form module and Rust/WebAssembly Cloudflare receiver. Candidate
-0.1.0: neither package publication nor production deployment has been performed.
+A standalone Nuxt form module and Rust/WebAssembly Cloudflare receiver. Nuxt module
+0.1.0 is published; the Graph-based Worker 0.3.0 is a source candidate and has not
+been deployed to production.
 No hosted CI is added. Local checks are reproducible with the commands below.
 
 ## Responsibilities and dependency review
@@ -13,10 +14,11 @@ No hosted CI is added. Local checks are reproducible with the commands below.
   modules from the Cloudflare adapter. No separate general-purpose core crate
   is invented without a second consumer. `workers-rs` supplies bindings,
   `ipnet` parses CIDRs, RustCrypto implements HMAC/SHA-256; none is reimplemented.
-- Zixcel owns provider **administration**, not this deployed application. Its
-  existing mail-core/message crates are SMTP/TLS/MIME-oriented and unpublished;
-  importing them would add an incompatible runtime and unrelated dependencies.
-  Cloudflare's structured Email Sending binding avoids hand-building MIME.
+- Zixcel owns Microsoft protocol and provider administration, not this deployed
+  application. The portable `zixcel-microsoft-mail` crate is pinned to an immutable
+  Git revision; it builds bounded OAuth/Graph messages without importing the
+  native administration CLI, SMTP/TLS/MIME stack or credential store. The Worker
+  owns HTTPS execution, admission, server-managed recipients and failure handling.
 - Crowsi owns credential custody and host authorization. Its current network
   controller is a deny-by-default **host control dry-run**, not an HTTP admission
   library. It is not copied here. Runtime secrets are Cloudflare bindings;
@@ -62,7 +64,7 @@ Build commands should run sequentially under the host's memory/time/task limits.
 The release artifact is distinct from `target/` and contains only the generated
 Worker code/Wasm and notices. Local build output is ignored by Git.
 
-`wrangler.jsonc` is deliberately disabled: no routes, sender, limiter, secrets or
+`wrangler.jsonc` is deliberately disabled: no routes, Graph identity, limiter, secrets or
 enabled sites are supplied. Missing dashboard variables fail closed. `keep_vars` preserves dashboard Text
 variables on code deployments; no defaults in the manifest overwrite them. Do not
 publish example addresses/CIDRs as live configuration. See

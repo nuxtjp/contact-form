@@ -42,14 +42,12 @@ pub struct Site {
     pub origin: String,
     pub hostname: String,
     pub to: String,
-    pub from: String,
     pub policy_version: String,
     pub enabled: bool,
     pub network: Network,
 }
 pub(super) fn parse(
     text: &str,
-    sender: &str,
     mut networks: BTreeMap<String, Network>,
 ) -> Result<Vec<Site>, &'static str> {
     let entries: Vec<&serde_json::value::RawValue> =
@@ -90,7 +88,6 @@ pub(super) fn parse(
             origin: s.origin,
             hostname,
             to: s.to,
-            from: sender.into(),
             policy_version: s.policy_version,
             enabled: s.enabled,
             network,

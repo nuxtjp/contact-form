@@ -9,9 +9,12 @@ Before enabling an origin:
    full 40-character lowercase Git commit. Syntax checks do not prove adoption.
 2. Choose API hostname ending `/v1/submissions`, exact allowed origins and fixed
    per-site destinations. Keep `workers_dev` and preview URLs disabled.
-3. Onboard an Email Service sending subdomain, verify fixed recipients and limit
-   the `EMAIL` binding to approved sender/destinations. Preserve the existing
-   Microsoft 365 root MX; do not replace it with Email Routing MX.
+3. Configure a Microsoft application restricted to the fixed sender mailbox by
+   Exchange Application RBAC `Application Mail.Send`. Do not add an independent
+   tenant-wide Entra Mail.Send grant: permissions are additive. Review the exact
+   production app and scope before provisioning. Existing human delegation is
+   not an application grant. Preserve Microsoft 365 MX/SPF/DKIM; this path needs
+   no Cloudflare Email Sending/Routing registration or sender DNS.
 4. Configure Turnstile hostname(s), action `contact`, server `TURNSTILE_SECRET`
    and client public sitekey. Store random `IP_KEY_SECRET` (at least 32 bytes) in
    Worker secrets only. Never copy secrets into site vars, UI, Git or logs.
@@ -41,8 +44,8 @@ A timeout cannot cancel or disprove provider delivery. A new ID can circumvent
 at-most-once protection, so it is not a cross-browser global deduplication rule.
 
 Telemetry defaults off. Review platform logs/tails/WAF separately so submitted
-personal data is not captured there. Worker invocation costs/limits and Email
-Service availability must be checked in the real account; local tests do not
+personal data is not captured there. Worker invocation costs/limits and Microsoft Graph/Exchange
+limits must be checked in the real account; local tests do not
 prove free-plan CPU fit or inbox delivery.
 
 ## Local browser acceptance
@@ -54,7 +57,7 @@ Run `CONTACT_FORM_BUILT=1 pnpm exec nuxt dev test/fixtures/contact --host
 `node packages/nuxt-contact-form/test/live.browser.mjs` and `pnpm test:design`.
 Tests mock Turnstile and mail/API responses with synthetic values; they never
 perform real sending. `pnpm test:worker` runs the compiled Rust Worker plus a
-real local SQLite Durable Object with synthetic limiter/email bindings.
+real local SQLite Durable Object with synthetic limiter and OAuth/Graph endpoints.
 The test harness is not referenced by production configuration.
 
 Development graph maintenance uses the already published
@@ -75,11 +78,10 @@ Deploy to apply the configuration. Changes do not require rebuilding Rust.
 | --- | --- | --- |
 | `CONTACT_ACCEPTING` | Global switch; exactly `true` or `false` | `false` |
 | `CONTACT_SITES_JSON` | Site key, exact HTTPS origin, recipient, enabled, pinned policy | Compact `config/sites.example.json` |
-| `CONTACT_MAIL_FROM` | One verified sender for this Worker | Empty until sender onboarding |
 | `CONTACT_NETWORK_JSON` | Common IP/CIDR policy | `{}` |
 | `CONTACT_SITE_NETWORKS_JSON` | Site key → additional network policy | `{}` |
 
-All five variables are required. Malformed configuration rejects submission with
+All four reception variables are required. Malformed configuration rejects submission with
 503. Missing `enabled` means false. Enabled entries require an adopted policy's
 ID and commit. The server derives the hostname from the exact origin; visitors
 cannot choose a recipient or sender. Each variable is bounded to 5120 UTF-8 bytes.
@@ -91,9 +93,9 @@ body reads, rate limits, Turnstile calls, reservations or mail sending. This doe
 not disable website browsing or other enabled sites. In-flight sending cannot
 be recalled by changing configuration.
 
-Change `to` only to an approved, verified recipient allowed by the `EMAIL`
-binding. Adding an email address in Text variables does not grant provider
-sending permissions. Secrets remain separate secret bindings; never enter them
+Change `to` only to an approved recipient in the existing Microsoft 365
+mail setup. Recipient allowlisting is enforced by these server-owned variables;
+Exchange mailbox scope restricts the sender, not recipients. Secrets remain separate secret bindings; never enter them
 in these Text variables. One sender can route different sites to different inboxes.
 The example has all 13 sites disabled; Coela and HAT are the first pilot sites.
 
@@ -115,7 +117,7 @@ cargo run --locked --example validate_settings -- /tmp/contact-dashboard.json
 `wrangler.jsonc` uses `keep_vars: true` and deliberately defines no `vars`, so
 later code deployment preserves dashboard variables. This does not preserve or
 provision arbitrary provider bindings. Before live deployment, the production
-manifest must include the reviewed EMAIL/LIMITER/secret/DO bindings and routes;
+manifest must include the reviewed Graph variables/secrets, LIMITER/DO bindings and routes;
 do not deploy the incomplete candidate manifest over a configured production
 Worker. Keep routes, sender permissions and domain records in the deployment
 review independently of editable reception policy.
@@ -143,3 +145,38 @@ For local acceptance, start the built-module fixture with
 `CONTACT_TEST_EMAIL_MODE=optional node test/email-mode.browser.mjs`.
 Stop that server and repeat both commands with `disabled`.
 These tests intercept delivery and use synthetic data; no real mail is sent.
+
+## Microsoft Graph machine delivery
+
+Set `GRAPH_TENANT_ID`, `GRAPH_CLIENT_ID` and `GRAPH_SENDER_MAILBOX_ID` as Text
+GUID values. Set `GRAPH_CLIENT_SECRET` as a Worker **Secret**, never as Text or
+public Nuxt config. These are required only when submitting to an enabled site;
+globally/per-site disabled requests are rejected without OAuth or delivery.
+Old `CONTACT_MAIL_FROM` and `EMAIL` bindings are unused and must be omitted from
+the reviewed production manifest. Sender identity comes only from the mailbox
+GUID; there is no client-controlled From address.
+
+Each admitted, nonduplicate submission performs one client-credentials request
+at the fixed tenant endpoint and at most one plain-text Graph sendMail request.
+There is no token persistence/cache, refresh-token flow, redirect following or
+automatic retry. Requests time out after 6 seconds, token body reads after a
+further 3 seconds with a 16 KiB limit. Provider error bodies are not read or
+reflected. Credentials and token request buffers use best-effort zeroization;
+platform-managed JavaScript/HTTP buffers cannot be promised immediate erasure.
+
+Graph 202 is `accepted_by_provider`, not proof of inbox delivery. The own
+submission UUID is the receipt; Graph returns no delivery ID in that response.
+After reservation, any failure is `outcome_unknown_do_not_resend`, and the same
+UUID is blocked without further OAuth/mail calls. Determine the actual outcome
+before an operator authorizes a new submission. `saveToSentItems=false` requests
+no extra Sent Items copy; verify actual shared-mailbox behavior and retention.
+
+Before production, check the app has no independent unrestricted Entra mail
+grants, test allowed sender access and another mailbox's denial, then verify
+synthetic Coela/HAT delivery in both inboxes. Application RBAC propagation can
+lag its diagnostic cmdlet, so a successful scope test alone is insufficient.
+No real credential or production permission is included in this repository.
+
+References: [Graph sendMail](https://learn.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0),
+[application RBAC](https://learn.microsoft.com/en-us/exchange/permissions-exo/application-rbac),
+[client credentials](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow).
