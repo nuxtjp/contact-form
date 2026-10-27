@@ -63,7 +63,8 @@ The release artifact is distinct from `target/` and contains only the generated
 Worker code/Wasm and notices. Local build output is ignored by Git.
 
 `wrangler.jsonc` is deliberately disabled: no routes, sender, limiter, secrets or
-enabled sites are supplied. The default `SITES_JSON=[]` fails closed. Do not
+enabled sites are supplied. Missing dashboard variables fail closed. `keep_vars` preserves dashboard Text
+variables on code deployments; no defaults in the manifest overwrite them. Do not
 publish example addresses/CIDRs as live configuration. See
 [operations](docs/operations.md) for activation prerequisites and limitations.
 

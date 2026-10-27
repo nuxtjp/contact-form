@@ -1,0 +1,7 @@
+{
+  "hat-corporate": {
+    "deniedCidrs": [
+      "198.51.100.0/24"
+    ]
+  }
+}

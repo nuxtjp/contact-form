@@ -64,3 +64,58 @@ maintained here). Refresh/install the lockfile and run `pnpm security:check`.
 The node-forge 1.4.0 version-only advisory remains visible because upstream has
 no fixed registry version; the actual patched RSA implementation is regression
 tested. Do not dismiss the advisory or describe the raw audit as clean.
+
+## Dashboard-managed reception
+
+In the Worker dashboard, open Settings → Variables and Secrets. Add these as
+**Text**, including the JSON strings (do not select JSON binding type), then
+Deploy to apply the configuration. Changes do not require rebuilding Rust.
+
+| Variable | Meaning | Initial value |
+| --- | --- | --- |
+| `CONTACT_ACCEPTING` | Global switch; exactly `true` or `false` | `false` |
+| `CONTACT_SITES_JSON` | Site key, exact HTTPS origin, recipient, enabled, pinned policy | Compact `config/sites.example.json` |
+| `CONTACT_MAIL_FROM` | One verified sender for this Worker | Empty until sender onboarding |
+| `CONTACT_NETWORK_JSON` | Common IP/CIDR policy | `{}` |
+| `CONTACT_SITE_NETWORKS_JSON` | Site key → additional network policy | `{}` |
+
+All five variables are required. Malformed configuration rejects submission with
+503. Missing `enabled` means false. Enabled entries require an adopted policy's
+ID and commit. The server derives the hostname from the exact origin; visitors
+cannot choose a recipient or sender. Each variable is bounded to 5120 UTF-8 bytes.
+Thirteen sites with full policy references fit when JSON is compacted.
+
+To stop one site, set its `enabled` to false in `CONTACT_SITES_JSON`. To stop all
+sites, set `CONTACT_ACCEPTING` to false. Disabled submissions return 403 before
+body reads, rate limits, Turnstile calls, reservations or mail sending. This does
+not disable website browsing or other enabled sites. In-flight sending cannot
+be recalled by changing configuration.
+
+Change `to` only to an approved, verified recipient allowed by the `EMAIL`
+binding. Adding an email address in Text variables does not grant provider
+sending permissions. Secrets remain separate secret bindings; never enter them
+in these Text variables. One sender can route different sites to different inboxes.
+The example has all 13 sites disabled; Coela and HAT are the first pilot sites.
+
+Network objects support `allowedCidrs`, `deniedCidrs`, `allowedCountries`,
+`deniedCountries`, `deniedRegions` (`country`, `region`) and `deniedAsns`.
+An empty object adds no restriction. Deny wins, and both the common policy and
+site-specific policy must permit a submission: site allow rules cannot override
+common deny rules. Unknown fields/site keys and invalid CIDRs reject configuration.
+The documentation CIDRs in the sample files are examples, not a production VPN list.
+
+Generate initial Text values with `node tools/dashboard-values.mjs`, save them
+privately if customizing, then validate with the runtime's own Rust parser:
+
+```sh
+node tools/dashboard-values.mjs > /tmp/contact-dashboard.json
+cargo run --locked --example validate_settings -- /tmp/contact-dashboard.json
+```
+
+`wrangler.jsonc` uses `keep_vars: true` and deliberately defines no `vars`, so
+later code deployment preserves dashboard variables. This does not preserve or
+provision arbitrary provider bindings. Before live deployment, the production
+manifest must include the reviewed EMAIL/LIMITER/secret/DO bindings and routes;
+do not deploy the incomplete candidate manifest over a configured production
+Worker. Keep routes, sender permissions and domain records in the deployment
+review independently of editable reception policy.

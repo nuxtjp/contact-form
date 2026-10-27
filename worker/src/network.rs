@@ -8,8 +8,8 @@ pub struct Region {
     pub country: String,
     pub region: String,
 }
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Default, Deserialize)]
+#[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct Network {
     pub allowed_cidrs: Vec<IpNet>,
     pub denied_cidrs: Vec<IpNet>,

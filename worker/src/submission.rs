@@ -72,7 +72,8 @@ fn uuid(s: &str) -> bool {
 }
 impl Submission {
     pub fn parse(bytes: &[u8]) -> Result<Self, &'static str> {
-        if bytes.len() > MAX_BODY {
+        if bytes.len() > MAX_BODY || bytes.iter().find(|b| !b.is_ascii_whitespace()) != Some(&b'{')
+        {
             return Err("invalid_submission");
         }
         let v: Self = serde_json::from_slice(bytes).map_err(|_| "invalid_submission")?;

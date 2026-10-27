@@ -1,10 +1,24 @@
-use nuxtjp_contact_worker::{config::sites, network::Network, submission::Submission};
+use nuxtjp_contact_worker::{
+    config::{self, Site, Variables},
+    network::Network,
+    submission::Submission,
+};
 use serde_json::{Value, json};
 fn network() -> Value {
     json!({"allowedCidrs":[],"deniedCidrs":[],"allowedCountries":[],"deniedCountries":[],"deniedRegions":[],"deniedAsns":[]})
 }
+fn sites(text: &str) -> Result<Vec<Site>, &'static str> {
+    config::parse(Variables {
+        accepting: "true",
+        sites: text,
+        sender: "forms@notify.example.com",
+        network: "{}",
+        site_networks: "{}",
+    })
+    .map(|c| c.sites)
+}
 fn site() -> Value {
-    json!({"siteKey":"fixture","origin":"https://example.com","hostname":"example.com","to":"contact@example.com","from":"forms@notify.example.com","policyVersion":format!("urn:coela:legal:fixture:policy@{}","a".repeat(40)),"enabled":true,"network":network()})
+    json!({"siteKey":"fixture","origin":"https://example.com","to":"contact@example.com","policyVersion":format!("urn:coela:legal:fixture:policy@{}","a".repeat(40)),"enabled":true})
 }
 #[test]
 fn shared_submission_vectors() {
@@ -32,6 +46,16 @@ fn duplicate_json_keys_and_oversized_bytes_fail() {
         .is_err()
     );
     assert!(Submission::parse(&vec![b' '; 24577]).is_err());
+    let positional = json!([
+        "hat-corporate",
+        "person@example.com",
+        "Question",
+        "Hello",
+        "token",
+        "00000000-0000-4000-8000-000000000001",
+        format!("urn:coela:legal:fixture:policy@{}", "a".repeat(40))
+    ]);
+    assert!(Submission::parse(&serde_json::to_vec(&positional).unwrap()).is_err());
 }
 #[test]
 fn configuration_is_exact_pinned_and_bounded() {
@@ -52,7 +76,7 @@ fn configuration_is_exact_pinned_and_bounded() {
         assert!(sites(&json!([s]).to_string()).is_err());
     }
     assert!(sites(&json!([site(), site()]).to_string()).is_err());
-    assert!(sites("[]").is_err());
+    assert!(sites("[]").unwrap().is_empty());
     assert!(sites(&" ".repeat(5121)).is_err());
 }
 #[test]

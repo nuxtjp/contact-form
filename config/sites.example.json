@@ -1,19 +1,93 @@
 [
- {
-  "siteKey":"hat-corporate",
-  "origin":"https://hat-tech.co.jp",
-  "hostname":"hat-tech.co.jp",
-  "to":"contact@hat-tech.co.jp",
-  "from":"forms@notify.example.com",
-  "policyVersion":"REVIEWED-POLICY-ID@FULL-GIT-COMMIT",
-  "enabled":false,
-  "network":{
-   "allowedCidrs":[],
-   "deniedCidrs":["192.0.2.0/24","2001:db8::/32"],
-   "allowedCountries":[],
-   "deniedCountries":[],
-   "deniedRegions":[],
-   "deniedAsns":[]
+  {
+    "siteKey": "hat-corporate",
+    "origin": "https://hat-tech.co.jp",
+    "to": "contact@hat-tech.co.jp",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "coela",
+    "origin": "https://coela.org",
+    "to": "contact@coela.org",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "nuxtjp",
+    "origin": "https://nuxt.jp",
+    "to": "contact@nuxt.jp",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "taiper",
+    "origin": "https://taiper.org",
+    "to": "contact@taiper.org",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "semantic-language",
+    "origin": "https://sem-lang.taiper.org",
+    "to": "contact@taiper.org",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "zixcel",
+    "origin": "https://zixcel.com",
+    "to": "contact@zixcel.com",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "crowsi",
+    "origin": "https://crowsi.org",
+    "to": "contact@crowsi.org",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "nerp",
+    "origin": "https://nerp.jp",
+    "to": "contact@nerp.jp",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "incus-japan",
+    "origin": "https://incus.jp",
+    "to": "contact@incus.jp",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "constillo",
+    "origin": "https://constillo.com",
+    "to": "contact@constillo.com",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "vpremises",
+    "origin": "https://vpremises.com",
+    "to": "contact@vpremises.com",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "ihat",
+    "origin": "https://ihat.online",
+    "to": "contact@ihat.online",
+    "enabled": false,
+    "policyVersion": ""
+  },
+  {
+    "siteKey": "hatter",
+    "origin": "https://hatter.ihat.online",
+    "to": "contact@ihat.online",
+    "enabled": false,
+    "policyVersion": ""
   }
- }
 ]

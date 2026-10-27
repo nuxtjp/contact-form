@@ -7,7 +7,12 @@ use crate::{
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use worker::*;
-pub async fn submit(req: &mut Request, env: &Env, site: &Site) -> Result<Response> {
+pub async fn submit(
+    req: &mut Request,
+    env: &Env,
+    site: &Site,
+    common_network: &Network,
+) -> Result<Response> {
     let o = Some(site.origin.as_str());
     let secret = env.secret("TURNSTILE_SECRET")?.to_string();
     let ip_secret = env.secret("IP_KEY_SECRET")?.to_string();
@@ -41,12 +46,14 @@ pub async fn submit(req: &mut Request, env: &Env, site: &Site) -> Result<Respons
     let Some(cf) = req.cf() else {
         return reply(403, "submission_unavailable", o);
     };
-    if !site.network.allows(
-        &ip,
-        cf.country().as_deref(),
-        cf.region_code().as_deref(),
-        cf.asn(),
-    ) {
+    if ![common_network, &site.network].iter().all(|network| {
+        network.allows(
+            &ip,
+            cf.country().as_deref(),
+            cf.region_code().as_deref(),
+            cf.asn(),
+        )
+    }) {
         return reply(403, "submission_unavailable", o);
     }
     let canonical = Network::canonical_ip(&ip).ok_or_else(|| Error::RustError("ip".into()))?;
