@@ -14,7 +14,7 @@ pub async fn submit(
     common_network: &Network,
 ) -> Result<Response> {
     let o = Some(site.origin.as_str());
-    let secret = env.secret("TURNSTILE_SECRET")?.to_string();
+    let secret = env.secret(&site.turnstile_secret_binding)?.to_string();
     let ip_secret = env.secret("IP_KEY_SECRET")?.to_string();
     if secret.is_empty() || ip_secret.len() < 32 {
         return reply(503, "submission_unavailable", o);

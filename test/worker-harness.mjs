@@ -14,6 +14,7 @@ export default {
   const site={siteKey:'hat-corporate',origin:'https://hat-tech.co.jp',to:'contact@hat-tech.co.jp',policyVersion,enabled:mode!=='disabled',network:{allowedCidrs:[],deniedCidrs:mode==='denied'?['203.0.113.0/24']:[],allowedCountries:[],deniedCountries:[],deniedRegions:[],deniedAsns:[]}}
   if (mode === 'email-optional') site.emailMode = 'optional'
   if (mode === 'email-disabled') site.emailMode = 'disabled'
+  if (mode.startsWith('widget-')) site.turnstileSecretBinding = 'TURNSTILE_SECRET_EXTENDED'
   const network=site.network;delete site.network
   const second={siteKey:'coela',origin:'https://coela.org',to:'contact@coela.org',enabled:mode!=='coela-disabled',policyVersion}
   const config={...env,CONTACT_ACCEPTING:mode==='all-disabled'?'false':'true',CONTACT_SITES_JSON:mode==='config'?'{}':JSON.stringify([site,second]),CONTACT_NETWORK_JSON:mode==='global-denied'?JSON.stringify({deniedCidrs:['203.0.113.0/24']}):'{}',CONTACT_SITE_NETWORKS_JSON:JSON.stringify({'hat-corporate':mode==='global-denied'?{allowedCidrs:['203.0.113.9/32']}:network}),TURNSTILE_SECRET:'synthetic',IP_KEY_SECRET:'s'.repeat(32),LIMITER:new Ratelimit(mode,calls),GRAPH_TENANT_ID:'aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb',GRAPH_CLIENT_ID:'cccccccc-1111-2222-3333-dddddddddddd',GRAPH_SENDER_MAILBOX_ID:'eeeeeeee-1111-2222-3333-ffffffffffff',GRAPH_CLIENT_SECRET:'synthetic+&= secret'}
@@ -23,6 +24,8 @@ export default {
   if(mode==='bad-graph-identity')config.GRAPH_TENANT_ID='common'
   if(mode==='bad-graph-secret')config.GRAPH_CLIENT_SECRET='bad\r\nsecret'
   if(mode==='missing-secret')delete config.TURNSTILE_SECRET
+  if(mode.startsWith('widget-') && mode!=='widget-missing')config.TURNSTILE_SECRET_EXTENDED='synthetic-extended'
+  if(mode==='widget-without-default')delete config.TURNSTILE_SECRET
   const headers=new Headers(request.headers);headers.set('cf-connecting-ip',mode==='no-ip'?'':'203.0.113.9')
   const incoming=new Request(request,{headers,cf:{country:'JP',regionCode:'13',asn:64500}})
   if(mode==='no-cf')Object.defineProperty(incoming,'cf',{value:undefined})
@@ -51,6 +54,7 @@ export default {
    if(outbound.url!=='https://challenges.cloudflare.com/turnstile/v0/siteverify')throw Error('unexpected network')
    calls.verify++;const input=url instanceof Request ? await url.json() : JSON.parse(await new Response(options.body).text())
    if(Object.keys(input).sort().join(',')!=='response,secret')throw Error('private data sent to verifier')
+   if(input.secret!==(mode.startsWith('widget-')?'synthetic-extended':'synthetic'))throw Error('wrong site widget secret')
    if(mode==='redirect')return new Response(null,{status:302,headers:{location:'https://must-not-follow.invalid/'}})
    if(mode==='huge-verification')return new Response('x'.repeat(8193))
    if(url instanceof Request && url.redirect!=='manual')throw Error('verification must not follow redirects')

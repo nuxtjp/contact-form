@@ -180,3 +180,22 @@ No real credential or production permission is included in this repository.
 References: [Graph sendMail](https://learn.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0),
 [application RBAC](https://learn.microsoft.com/en-us/exchange/permissions-exo/application-rbac),
 [client credentials](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow).
+
+## Multiple Turnstile widgets
+
+Free Turnstile widgets accept at most ten configured hostnames. Group parent
+hostnames and their subdomains when they share an operator; keep exact Origin,
+siteKey, hostname and action checks on the server. Use another managed widget
+instead of broadening a hostname to a public suffix or upgrading the plan.
+
+A server-side site entry can specify `turnstileSecretBinding`, for example
+`TURNSTILE_SECRET_EXTENDED`. Omitted values retain `TURNSTILE_SECRET` for existing
+sites. Only that name or `TURNSTILE_SECRET_` followed by 1–32 uppercase letters,
+digits or underscores is accepted. The selected value must be a Worker Secret.
+A missing named Secret refuses the request; it never falls back to another widget.
+Browser submission fields cannot choose this binding. Client public sitekeys must
+match the widget selected for that site. Existing IP and Graph secrets are not
+read as challenge secrets and need not be rotated.
+
+Reference: https://developers.cloudflare.com/turnstile/plans/ and
+https://developers.cloudflare.com/turnstile/additional-configuration/hostname-management/ .

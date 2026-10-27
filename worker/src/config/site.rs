@@ -10,6 +10,8 @@ use std::collections::{BTreeMap, HashSet};
 struct Entry {
     #[serde(default)]
     email_mode: EmailMode,
+    #[serde(default = "default_turnstile_binding")]
+    turnstile_secret_binding: String,
     site_key: String,
     origin: String,
     to: String,
@@ -36,8 +38,24 @@ impl EmailMode {
         }
     }
 }
+fn default_turnstile_binding() -> String {
+    "TURNSTILE_SECRET".to_owned()
+}
+fn valid_turnstile_binding(value: &str) -> bool {
+    value == "TURNSTILE_SECRET"
+        || value
+            .strip_prefix("TURNSTILE_SECRET_")
+            .is_some_and(|suffix| {
+                !suffix.is_empty()
+                    && suffix.len() <= 32
+                    && suffix
+                        .bytes()
+                        .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || b == b'_')
+            })
+}
 pub struct Site {
     pub email_mode: EmailMode,
+    pub turnstile_secret_binding: String,
     pub site_key: String,
     pub origin: String,
     pub hostname: String,
@@ -64,7 +82,8 @@ pub(super) fn parse(
         }
         let s: Entry = serde_json::from_str(raw.get()).map_err(|_| "invalid_site")?;
         let u = url::Url::parse(&s.origin).map_err(|_| "invalid_site")?;
-        if !site_key(&s.site_key)
+        if !valid_turnstile_binding(&s.turnstile_secret_binding)
+            || !site_key(&s.site_key)
             || s.policy_version.len() > 160
             || (s.enabled && !policy(&s.policy_version))
             || !mailbox(&s.to)
@@ -84,6 +103,7 @@ pub(super) fn parse(
         }
         sites.push(Site {
             email_mode: s.email_mode,
+            turnstile_secret_binding: s.turnstile_secret_binding,
             site_key: s.site_key,
             origin: s.origin,
             hostname,
