@@ -2,9 +2,9 @@
 import { computed, useId } from 'vue'
 import { useAppConfig } from '#imports'
 import { defaultOptions, validPrivacyUrl, type ModuleOptions } from './config'
-import { defaultTexts, type ContactTexts, type ContactUi, type FieldSlot, type ConsentSlot, type ActionSlot } from './design'
+import { defaultTexts, englishTexts, type ContactTexts, type ContactUi, type FieldSlot, type ConsentSlot, type ActionSlot } from './design'
 import { useContact } from './useContact'
-const props = withDefaults(defineProps<{ privacyUrl?: string; ui?: ContactUi; texts?: ContactTexts; unstyled?: boolean }>(), { privacyUrl: '', unstyled: false })
+const props = withDefaults(defineProps<{ privacyUrl?: string; locale?: 'ja' | 'en'; headingTag?: 'h1' | 'h2'; ui?: ContactUi; texts?: ContactTexts; unstyled?: boolean }>(), { privacyUrl: '', locale: 'ja', headingTag: 'h1', unstyled: false })
 defineSlots<{
  email(props: FieldSlot): unknown; subject(props: FieldSlot): unknown; message(props: FieldSlot): unknown
  consent(props: ConsentSlot): unknown; review(props: { fields: Readonly<{ email: string; subject: string; message: string }> }): unknown
@@ -14,7 +14,7 @@ defineSlots<{
 const options = { ...defaultOptions, ...useAppConfig().contactForm as Partial<ModuleOptions> }
 const privacyUrl = validPrivacyUrl(props.privacyUrl || options.privacyUrl) ? props.privacyUrl || options.privacyUrl : ''
 const live = options.mode === 'live' && Boolean(privacyUrl)
-const texts = computed(() => ({ ...defaultTexts, ...props.texts }))
+const texts = computed(() => ({ ...(props.locale === 'en' ? englishTexts : defaultTexts), ...props.texts }))
 const { fields, snapshot, confirming, notice, token, busy, locked, ready, heading, challengeElement, review, back, send, finish } = useContact(options, live, texts.value)
 const visibleFields = options.emailMode === 'disabled' ? ['subject', 'message'] as const : ['email', 'subject', 'message'] as const
 const id = useId()
@@ -26,7 +26,7 @@ function attrs(field: 'email' | 'subject' | 'message') {
 <template>
  <section :class="['contact-preview', { 'contact-styled': !unstyled }, ui?.root]" :aria-labelledby="`${id}-heading`">
   <p v-if="!live" class="preview-label">{{ texts.preview }}</p>
-  <h1 :id="`${id}-heading`" ref="heading" tabindex="-1" :class="ui?.heading">{{ confirming ? texts.reviewHeading : texts.heading }}</h1>
+  <component :is="headingTag" :id="`${id}-heading`" ref="heading" tabindex="-1" :class="ui?.heading">{{ confirming ? texts.reviewHeading : texts.heading }}</component>
   <p :class="['intro', ui?.intro]">{{ confirming ? (live ? texts.reviewIntro : texts.previewIntro) : texts.intro }}</p>
   <form v-if="!confirming" method="dialog" :class="ui?.form" @submit.prevent="review">
    <noscript><p>{{ texts.noScript }}</p></noscript>
