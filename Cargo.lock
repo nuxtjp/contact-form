@@ -909,7 +909,7 @@ dependencies = [
 [[package]]
 name = "zixcel-microsoft-mail"
 version = "0.1.0"
-source = "git+https://github.com/zixcel/zixcel-microsoft?rev=c33b3000ecfd36371b0864adaa6ebffb0dc3c486#c33b3000ecfd36371b0864adaa6ebffb0dc3c486"
+source = "git+https://github.com/zixcel/zixcel-microsoft?rev=c310e59be1a85ce2db5d58ea60f6ba366b466217#c310e59be1a85ce2db5d58ea60f6ba366b466217"
 dependencies = [
  "serde",
  "serde_json",

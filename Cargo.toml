@@ -16,7 +16,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.150", features = ["raw_value"] }
 ipnet = { version = "2.12.2", features = ["serde"] }
 url = "2.5.8"
-zixcel-microsoft-mail = { git = "https://github.com/zixcel/zixcel-microsoft", rev = "c33b3000ecfd36371b0864adaa6ebffb0dc3c486", version = "=0.1.0" }
+zixcel-microsoft-mail = { git = "https://github.com/zixcel/zixcel-microsoft", rev = "c310e59be1a85ce2db5d58ea60f6ba366b466217", version = "=0.1.0" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 worker = "=0.8.7"
