@@ -1,6 +1,6 @@
 # Design customization
 
-A component's `ui`, `texts`, `unstyled` props configure presentation independently
+A component's `ui`, `texts`, `unstyled`, `locale` and `headingTag` props configure presentation independently
 of module-level endpoint/security configuration. The default implementation is
 usable without any third-party design system. Multiple forms have unique IDs.
 
@@ -43,3 +43,8 @@ state even if a custom button ignores `disabled`. Sending uses the reviewed
 snapshot, not mutable slot state. Custom slots are trusted site application code;
 they can violate site privacy/accessibility and must be reviewed as such.
 Server-side admission is mandatory regardless of client design or validation.
+
+Use `locale="en"` for the built-in English labels (Japanese is the default).
+Set `heading-tag="h2"` when the containing page already owns its h1. On localized
+SPA navigation, key the component by locale to discard any unfinished input
+and restart labels/state together; no input is persisted across pages.

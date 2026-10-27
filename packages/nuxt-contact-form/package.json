@@ -1,7 +1,6 @@
 {
   "name": "@nuxtjp/contact-form",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Nuxt contact form with inert native fallback and explicit guarded submission",
   "license": "Apache-2.0",
@@ -38,5 +37,9 @@
   "devDependencies": {
     "@nuxt/module-builder": "1.0.3",
     "typescript": "5.9.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
