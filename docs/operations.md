@@ -119,3 +119,27 @@ manifest must include the reviewed EMAIL/LIMITER/secret/DO bindings and routes;
 do not deploy the incomplete candidate manifest over a configured production
 Worker. Keep routes, sender permissions and domain records in the deployment
 review independently of editable reception policy.
+
+## Optional reply addresses
+
+Set `emailMode` on each `CONTACT_SITES_JSON` entry and the corresponding Nuxt
+`contactForm.emailMode` to `required` (default), `optional`, or `disabled`.
+The server is authoritative: required rejects a missing/empty address; optional
+accepts omission but validates every nonempty address; disabled rejects nonempty
+addresses even from a modified client. Unknown modes fail closed.
+The UI omits empty addresses from JSON; disabled mode removes the field and its
+review row. No substitute or fabricated Reply-To is used when the address is
+absent, and no visitor auto-reply is sent. Subject and message remain required.
+A client/server mismatch can reject a submission; deploy both settings together.
+
+Describe this as contact-detail-free reporting, not guaranteed anonymity.
+Cloudflare/Turnstile still process connection metadata, network restrictions
+and HMAC rate limiting remain active, and the text itself may identify people.
+The policy acknowledgement is retained even when an address is not collected;
+it does not establish the legal basis of every processing activity.
+
+For local acceptance, start the built-module fixture with
+`CONTACT_FORM_BUILT=1 CONTACT_TEST_EMAIL_MODE=optional pnpm exec nuxt dev test/fixtures/contact --host 127.0.0.1 --port 3418`, then run
+`CONTACT_TEST_EMAIL_MODE=optional node test/email-mode.browser.mjs`.
+Stop that server and repeat both commands with `disabled`.
+These tests intercept delivery and use synthetic data; no real mail is sent.

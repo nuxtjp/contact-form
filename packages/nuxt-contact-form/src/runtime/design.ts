@@ -4,6 +4,8 @@ export const defaultTexts = {
  reviewIntro: '入力内容をご確認ください。', preview: '表示プレビュー · メールは送信されません',
  previewIntro: '表示内容をご確認ください。ここでは実際の受付は行いません。',
  email: 'メールアドレス', subject: '件名', message: 'お問い合わせ内容', required: '必須',
+ optional: '任意', notProvided: '未入力（返信できません）',
+ optionalEmailHint: '返信を希望する場合だけご入力ください。未入力でも情報提供できます。',
  emailHint: '返信を受け取るメールアドレスをご入力ください。',
  messageHint: 'パスワードや認証情報などの秘密情報は記入しないでください。',
  privacy: '個人情報の取り扱い', acknowledged: 'を確認しました。',

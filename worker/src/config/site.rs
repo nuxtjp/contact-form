@@ -8,6 +8,8 @@ use std::collections::{BTreeMap, HashSet};
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Entry {
+    #[serde(default)]
+    email_mode: EmailMode,
     site_key: String,
     origin: String,
     to: String,
@@ -16,7 +18,26 @@ struct Entry {
     #[serde(default)]
     policy_version: String,
 }
+/// The server owns this policy; browser configuration cannot relax it.
+#[derive(Clone, Copy, Default, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum EmailMode {
+    #[default]
+    Required,
+    Optional,
+    Disabled,
+}
+impl EmailMode {
+    pub fn accepts(self, email: &str) -> bool {
+        match self {
+            Self::Required => !email.is_empty() && mailbox(email),
+            Self::Optional => email.is_empty() || mailbox(email),
+            Self::Disabled => email.is_empty(),
+        }
+    }
+}
 pub struct Site {
+    pub email_mode: EmailMode,
     pub site_key: String,
     pub origin: String,
     pub hostname: String,
@@ -64,6 +85,7 @@ pub(super) fn parse(
             return Err("invalid_network");
         }
         sites.push(Site {
+            email_mode: s.email_mode,
             site_key: s.site_key,
             origin: s.origin,
             hostname,

@@ -22,6 +22,13 @@ try{
   assert.equal(r.status,mode==='normal'?202:403);assert.equal(r.body.calls.email.length,mode==='normal'?1:0)
   if(mode==='normal')assert.equal(r.body.calls.email[0].to,'contact@coela.org');checks++
  }
+ for(const [mode,email,status] of [['normal',undefined,400],['normal','',400],['email-optional',undefined,202],['email-optional','',202],['email-optional','person@example.com',202],['email-optional','bad',400],['email-disabled',undefined,202],['email-disabled','person@example.com',400]]) {
+  const r=await request(mode,{email});assert.equal(r.status,status,JSON.stringify({mode,email,...r}))
+  assert.equal(r.body.calls.email.length,status===202?1:0)
+  if(status===202)assert.equal(r.body.calls.email[0].replyTo,email || undefined)
+  else assert.equal(r.body.calls.verify,0)
+  checks++
+ }
  const paused=await request('coela-disabled');assert.equal(paused.status,202);checks++
  const rows=JSON.parse(await readFile(new URL('../contracts/submission-vectors.json',import.meta.url),'utf8'))
  for(const row of rows.filter(r=>!r.valid)){const r=await request('normal',row.value);assert.equal(r.status,400,row.name);assert.equal(r.body.calls.verify,0);checks++}

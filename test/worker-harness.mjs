@@ -12,6 +12,8 @@ export default {
   const mode=request.headers.get('x-test-mode')||'normal'
   const calls={limit:0,verify:0,email:[]}
   const site={siteKey:'hat-corporate',origin:'https://hat-tech.co.jp',to:'contact@hat-tech.co.jp',policyVersion,enabled:mode!=='disabled',network:{allowedCidrs:[],deniedCidrs:mode==='denied'?['203.0.113.0/24']:[],allowedCountries:[],deniedCountries:[],deniedRegions:[],deniedAsns:[]}}
+  if (mode === 'email-optional') site.emailMode = 'optional'
+  if (mode === 'email-disabled') site.emailMode = 'disabled'
   const network=site.network;delete site.network
   const second={siteKey:'coela',origin:'https://coela.org',to:'contact@coela.org',enabled:mode!=='coela-disabled',policyVersion}
   const config={...env,CONTACT_ACCEPTING:mode==='all-disabled'?'false':'true',CONTACT_SITES_JSON:mode==='config'?'{}':JSON.stringify([site,second]),CONTACT_MAIL_FROM:'forms@notify.example.com',CONTACT_NETWORK_JSON:mode==='global-denied'?JSON.stringify({deniedCidrs:['203.0.113.0/24']}):'{}',CONTACT_SITE_NETWORKS_JSON:JSON.stringify({'hat-corporate':mode==='global-denied'?{allowedCidrs:['203.0.113.9/32']}:network}),TURNSTILE_SECRET:'synthetic',IP_KEY_SECRET:'s'.repeat(32),LIMITER:new Ratelimit(mode,calls),EMAIL:{async send(v){calls.email.push(v);if(mode==='unknown')throw Error('synthetic delivery error');return {messageId:'test-id'}}}}

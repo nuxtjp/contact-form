@@ -5,6 +5,7 @@ pub const MAX_BODY: usize = 24_576;
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Submission {
     pub site_key: String,
+    #[serde(default)]
     pub email: String,
     pub subject: String,
     pub message: String,
@@ -78,7 +79,7 @@ impl Submission {
         }
         let v: Self = serde_json::from_slice(bytes).map_err(|_| "invalid_submission")?;
         if !site_key(&v.site_key)
-            || !mailbox(&v.email)
+            || (!v.email.is_empty() && !mailbox(&v.email))
             || !uuid(&v.submission_id)
             || !policy(&v.policy_version)
             || v.turnstile_token.is_empty()

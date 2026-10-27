@@ -10,11 +10,12 @@ export function useContact(options: ModuleOptions, live: boolean, texts: typeof 
  const confirming = ref(false), notice = ref(''), token = ref(''), busy = ref(false), locked = ref(false), ready = ref(false)
  const heading = ref<HTMLHeadingElement>(), challengeElement = ref<HTMLElement>()
  let dispose: (() => void) | undefined
- const valid = () => fields.consent && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email) && fields.email.length <= 254 && fields.subject.trim().length > 0 && fields.subject.length <= 150 && fields.message.trim().length > 0 && fields.message.length <= 5000
+ const validEmail = () => options.emailMode === 'disabled' || (options.emailMode === 'optional' && fields.email === '') || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email) && fields.email.length <= 254)
+ const valid = () => fields.consent && validEmail() && fields.subject.trim().length > 0 && fields.subject.length <= 150 && fields.message.trim().length > 0 && fields.message.length <= 5000
  async function review() {
   if (!ready.value || busy.value || locked.value) return
   if (!valid()) { notice.value = texts.invalid; return }
-  Object.assign(snapshot, { email: fields.email, subject: fields.subject, message: fields.message })
+  Object.assign(snapshot, { email: options.emailMode === 'disabled' ? '' : fields.email, subject: fields.subject, message: fields.message })
   confirming.value = true; notice.value = ''; await nextTick(); heading.value?.focus()
  }
  function back() { if (!busy.value && !locked.value) confirming.value = false }
@@ -28,7 +29,7 @@ export function useContact(options: ModuleOptions, live: boolean, texts: typeof 
  async function send() {
   if (!ready.value || !confirming.value || !live || busy.value || locked.value || !token.value || !fields.consent) return
   busy.value = true
-  const result = await sendContact(options.endpoint, {siteKey: options.siteKey, ...snapshot, turnstileToken: token.value, submissionId: crypto.randomUUID(), policyVersion: options.policyVersion})
+  const result = await sendContact(options.endpoint, {siteKey: options.siteKey, subject: snapshot.subject, message: snapshot.message, ...(snapshot.email ? {email: snapshot.email} : {}), turnstileToken: token.value, submissionId: crypto.randomUUID(), policyVersion: options.policyVersion})
   dispose?.(); busy.value = false; locked.value = true; token.value = ''
   notice.value = result === 'accepted' ? texts.accepted : result === 'rejected' ? texts.rejected : texts.unknown
  }

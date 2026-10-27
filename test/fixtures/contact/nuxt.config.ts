@@ -7,6 +7,7 @@ export default defineNuxtConfig({
  telemetry: false,
  devtools: { enabled: false },
  contactForm: {
+  emailMode: (process.env.CONTACT_TEST_EMAIL_MODE || 'required') as 'required' | 'optional' | 'disabled',
   mode: 'live', endpoint: 'https://api.example.com/v1/submissions',
   siteKey: 'fixture', turnstileSiteKey: 'test-only',
   policyVersion: 'urn:coela:legal:fixture:policy@' + 'a'.repeat(40), privacyUrl: '/privacy/'

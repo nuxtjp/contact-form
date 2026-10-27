@@ -62,3 +62,13 @@ node packages/nuxt-contact-form/test/security.browser.mjs
 ```
 
 Presentation customization: see `docs/design.md` in nuxtjp/contact-form. No Nuxt UI dependency.
+
+### Contact-detail-free reports
+
+`contactForm.emailMode` accepts `required` (default), `optional`, or `disabled`.
+Use `optional` to allow reports without an address or `disabled` to remove the
+address field entirely. Match the Worker site's `emailMode`; only the server
+can authorize address-free delivery. With no address, there is no Reply-To and
+no reply can be promised. The common `privacyUrl` may be an HTTPS link to HAT's
+policy, while `policyVersion` pins the adopted ID and full commit for all sites.
+This is not a promise of anonymous network access; see operations documentation.
