@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nuxtjp/contact-form/contracts/submission-v1",
+  "title": "Contact submission v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "siteKey",
+    "email",
+    "subject",
+    "message",
+    "turnstileToken",
+    "submissionId",
+    "policyVersion"
+  ],
+  "properties": {
+    "siteKey": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+    },
+    "email": {
+      "type": "string",
+      "maxLength": 254
+    },
+    "subject": {
+      "type": "string",
+      "maxLength": 150
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 5000
+    },
+    "turnstileToken": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "submissionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "policyVersion": {
+      "type": "string",
+      "maxLength": 160,
+      "pattern": "^urn:coela:legal:[A-Za-z0-9:.\\-]+@[0-9a-f]{40}$"
+    }
+  }
+}

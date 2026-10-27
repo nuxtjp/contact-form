@@ -1,0 +1,5 @@
+Contact form module, NuxtJP contributors.
+The component is original source. Nuxt, Vue and the separately loaded Cloudflare
+Turnstile service retain their respective terms and conditions.
+The Rust adapter uses the Cloudflare Workers SDK, ipnet, RustCrypto HMAC/SHA-256,
+serde, url and wasm-streams under their respective upstream licenses.

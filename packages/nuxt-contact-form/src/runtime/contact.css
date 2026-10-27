@@ -1,0 +1,21 @@
+:where(.contact-styled) fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.contact-styled { max-width: var(--contact-width, 42rem); margin: 3rem auto; padding: 0 1.25rem 3rem; color: var(--contact-color, #172538); font-family: var(--contact-font, sans-serif); line-height: 1.7; }
+:where(.contact-styled) .preview-label { display: inline-block; padding: .3rem .8rem; border: 1px solid #bfd3ec; border-radius: 6px; background: #eff6ff; color: #234e80; font-size: .8rem; }
+:where(.contact-styled) h1 { font-size: 2rem; font-weight: 700; margin: 1.3rem 0 .5rem; letter-spacing: .06em; }
+:where(.contact-styled) .intro { color: #536174; margin-bottom: 2rem; }
+:where(.contact-styled) label { display: block; margin: 1.4rem 0; font-weight: 600; }
+:where(.contact-styled) label > span:not(.consent-text) { font-size: .7rem; color: #a32b37; margin-left: .5rem; background: #fff1f2; padding: .15rem .4rem; border-radius: 3px; }
+:where(.contact-styled) input:not([type=checkbox]), :where(.contact-styled) textarea { display: block; box-sizing: border-box; width: 100%; margin-top: .5rem; padding: .7rem .8rem; border: 1px solid #94a3b8; border-radius: var(--contact-radius, 5px); background: white; color: var(--contact-color, #172538); font: inherit; font-weight: 400; }
+:where(.contact-styled) textarea { resize: vertical; }
+:where(.contact-styled) small, :where(.contact-styled) .policy-note { display: block; font-size: .8rem; font-weight: 400; color: #536174; margin-top: .4rem; }
+:where(.contact-styled) .consent { display: flex; gap: .7rem; align-items: start; font-size: .9rem; font-weight: 400; margin-bottom: .4rem; }
+:where(.contact-styled) input[type=checkbox] { width: 1.2rem; height: 1.2rem; flex: 0 0 auto; margin-top: .2rem; accent-color: var(--contact-accent, #1857a4); }
+:where(.contact-styled) button:disabled { opacity: .55; cursor: not-allowed; }
+:where(.contact-styled) a { color: var(--contact-accent, #1857a4); text-decoration: underline; }
+:where(.contact-styled) button { display: inline-flex; justify-content: center; gap: 2rem; background: var(--contact-accent, #1857a4); color: white; border: 1px solid #1857a4; padding: .8rem 1.5rem; border-radius: var(--contact-radius, 5px); font: inherit; cursor: pointer; margin-top: 1.6rem; }
+:where(.contact-styled) .secondary { background: white; color: var(--contact-accent, #1857a4); }
+:where(.contact-styled) .actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+:where(.contact-styled) dt { font-weight: 600; margin-top: 1.2rem; }
+:where(.contact-styled) dd { margin: .4rem 0 1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+:where(.contact-styled) :is(input, textarea, button, a):focus-visible { outline: 3px solid #e2a400; outline-offset: 3px; }
+@media(max-width: 480px) { .contact-styled { margin-top: 1.5rem; } :where(.contact-styled) button { width: 100%; } }

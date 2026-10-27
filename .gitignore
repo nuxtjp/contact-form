@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.nuxt/
+.output/
+.pnpm-store/
+target/
+build/
+.wrangler/
+.dev.vars*
+.env*
+*.tgz

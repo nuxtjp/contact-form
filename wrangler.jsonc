@@ -1,0 +1,13 @@
+{
+  // Disabled candidate: no route, enabled site, secrets or email/rate-limit binding.
+  "name": "nuxtjp-contact-submissions",
+  "main": "build/index.js",
+  "compatibility_date": "2026-10-26",
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": false },
+  "build": { "command": "worker-build --release --no-opt --no-panic-recovery" },
+  "vars": { "SITES_JSON": "[]" },
+  "durable_objects": { "bindings": [ { "name": "RECEIPTS_NAMESPACE", "class_name": "ContactReceipts" } ] },
+  "migrations": [ { "tag": "v1", "new_sqlite_classes": ["ContactReceipts"] } ]
+}

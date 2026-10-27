@@ -1,0 +1,4 @@
+{
+ "compilerOptions": {"target":"ES2022","module":"ESNext","moduleResolution":"Bundler","strict":true,"skipLibCheck":true,"types":[],"baseUrl":".","paths":{"#imports":["test/fixtures/contact/.nuxt/imports"]}},
+ "include":["packages/nuxt-contact-form/src/**/*.ts","packages/nuxt-contact-form/src/**/*.vue","test/fixtures/contact/*.vue"]
+}

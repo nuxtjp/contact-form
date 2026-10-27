@@ -1,0 +1,3 @@
+# Preserve published upstream patches/licenses byte-for-byte.
+.nuxtjp-security/*.patch -whitespace
+.nuxtjp-security/LICENSE-* -whitespace

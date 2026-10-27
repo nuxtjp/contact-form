@@ -1,0 +1,30 @@
+{
+  "name": "contact-form-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "test": "node --test packages/nuxt-contact-form/test/*.test.mjs",
+    "build:module": "pnpm --filter @nuxtjp/contact-form build",
+    "dev": "nuxt dev playground",
+    "test:rust": "cargo test --locked",
+    "build:worker": "worker-build --release --no-opt --no-panic-recovery",
+    "check:worker": "node tools/check-worker.mjs",
+    "typecheck": "nuxt prepare test/fixtures/contact && vue-tsc --noEmit -p tsconfig.json",
+    "security:check": "nuxtjp-security-check --project-root .",
+    "test:worker": "node test/worker.browserless.mjs",
+    "test:design": "node test/design.browser.mjs",
+    "security:sync": "node tools/sync-security.mjs"
+  },
+  "devDependencies": {
+    "@nuxt/module-builder": "1.0.3",
+    "@nuxt/schema": "4.6.2",
+    "@playwright/test": "1.64.1",
+    "nuxt": "4.6.2",
+    "typescript": "5.9.3",
+    "vue": "3.5.44",
+    "vue-tsc": "3.3.13",
+    "wrangler": "4.151.2",
+    "@nuxtjp/dependency-security": "0.2.1"
+  }
+}
