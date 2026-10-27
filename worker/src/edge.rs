@@ -14,10 +14,31 @@ async fn handle(req: &mut Request, env: &Env, origin: &mut Option<String>) -> Re
     if url.scheme() != "https" || url.path() != "/v1/submissions" || url.query().is_some() {
         return reply(404, "not_found", None);
     }
-    let list = config::sites(&env.var("SITES_JSON")?.to_string())
-        .map_err(|_| Error::RustError("configuration".into()))?;
+    let values = [
+        "CONTACT_ACCEPTING",
+        "CONTACT_SITES_JSON",
+        "CONTACT_MAIL_FROM",
+        "CONTACT_NETWORK_JSON",
+        "CONTACT_SITE_NETWORKS_JSON",
+    ]
+    .map(|key| env.var(key).map(|v| v.to_string()));
+    let [accepting, sites, sender, network, site_networks] = values;
+    let (accepting, sites, sender, network, site_networks) =
+        (accepting?, sites?, sender?, network?, site_networks?);
+    let settings = config::parse(config::Variables {
+        accepting: &accepting,
+        sites: &sites,
+        sender: &sender,
+        network: &network,
+        site_networks: &site_networks,
+    })
+    .map_err(|_| Error::RustError("configuration".into()))?;
     let incoming = req.headers().get("origin")?;
-    let Some(site) = list.iter().find(|s| Some(&s.origin) == incoming.as_ref()) else {
+    let Some(site) = settings
+        .sites
+        .iter()
+        .find(|s| Some(&s.origin) == incoming.as_ref())
+    else {
         return reply(403, "submission_unavailable", None);
     };
     *origin = Some(site.origin.clone());
@@ -57,8 +78,8 @@ async fn handle(req: &mut Request, env: &Env, origin: &mut Option<String>) -> Re
         r.headers_mut().set("allow", "POST, OPTIONS")?;
         return Ok(r);
     }
-    if !site.enabled {
+    if !settings.accepting || !site.enabled {
         return reply(403, "submission_unavailable", o);
     }
-    crate::receive::submit(req, env, site).await
+    crate::receive::submit(req, env, site, &settings.network).await
 }
