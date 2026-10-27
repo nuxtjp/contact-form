@@ -9,7 +9,7 @@ pub async fn deliver(
     input: &Submission,
     secret: &str,
     receipts: ObjectNamespace,
-    email: SendEmail,
+    graph: crate::graph::Graph,
 ) -> Result<Response> {
     let o = Some(site.origin.as_str());
     if !verify(secret, &input.turnstile_token, &site.hostname).await? {
@@ -34,23 +34,20 @@ pub async fn deliver(
         "Receipt: {}\nPolicy: {}\nSubject: {}\n\n{}",
         input.submission_id, input.policy_version, input.subject, input.message
     );
-    let mut message = SendEmailBuilder::builder(
-        &site.from,
-        &site.to,
-        &format!("Website contact: {}", site.site_key),
-    )
-    .text(&text);
-    if !input.email.is_empty() {
-        message = message.reply_to(&input.email);
-    }
-    let message = message.build();
-    let sent = deadline(
-        async { email.send_with_builder(&message).await.map_err(Error::from) },
-        6000,
-    )
-    .await;
-    match sent {
-        Ok(result) if !result.message_id().is_empty() => reply(202, "accepted_by_provider", o),
-        _ => reply(503, "outcome_unknown_do_not_resend", o),
+    match graph
+        .send(zixcel_microsoft_mail::PlainMail {
+            to: &site.to,
+            subject: &format!("Website contact: {}", site.site_key),
+            text: &text,
+            reply_to: if input.email.is_empty() {
+                None
+            } else {
+                Some(&input.email)
+            },
+        })
+        .await
+    {
+        Ok(()) => reply(202, "accepted_by_provider", o),
+        Err(_) => reply(503, "outcome_unknown_do_not_resend", o),
     }
 }

@@ -15,7 +15,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let settings = parse(Variables {
         accepting: get("CONTACT_ACCEPTING")?,
         sites: get("CONTACT_SITES_JSON")?,
-        sender: get("CONTACT_MAIL_FROM")?,
         network: get("CONTACT_NETWORK_JSON")?,
         site_networks: get("CONTACT_SITE_NETWORKS_JSON")?,
     })?;

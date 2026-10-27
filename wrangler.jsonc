@@ -1,5 +1,5 @@
 {
-  // Disabled candidate: no route, enabled site, secrets or email/rate-limit binding.
+  // Disabled candidate: no route, enabled site, secrets, Graph identity or rate-limit binding.
   "name": "nuxtjp-contact-submissions",
   "main": "build/index.js",
   "compatibility_date": "2026-10-26",

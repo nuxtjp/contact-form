@@ -4,12 +4,11 @@ fn entries() -> Value {
     json!([{"siteKey":"first","origin":"https://one.example.com","to":"contact@one.example.com","enabled":true,"policyVersion":format!("urn:coela:legal:fixture:policy@{}","a".repeat(40))},{"siteKey":"second","origin":"https://two.example.com","to":"contact@two.example.com"}])
 }
 #[test]
-fn per_site_disabled_default_and_sender_are_not_client_controlled() {
+fn per_site_disabled_default_and_recipients_are_server_controlled() {
     let rows = entries().to_string();
     let c = parse(Variables {
         accepting: "true",
         sites: &rows,
-        sender: "forms@notify.example.com",
         network: "{}",
         site_networks: "{}",
     })
@@ -18,7 +17,6 @@ fn per_site_disabled_default_and_sender_are_not_client_controlled() {
     assert!(c.sites[0].enabled);
     assert!(!c.sites[1].enabled);
     assert_eq!(c.sites[1].hostname, "two.example.com");
-    assert_eq!(c.sites[0].from, "forms@notify.example.com");
     assert_ne!(c.sites[0].to, c.sites[1].to);
 }
 #[test]
@@ -27,7 +25,6 @@ fn emergency_stop_and_bad_flags_fail_closed() {
     let c = parse(Variables {
         accepting: "false",
         sites: &rows,
-        sender: "",
         network: "{}",
         site_networks: "{}",
     })
@@ -38,18 +35,18 @@ fn emergency_stop_and_bad_flags_fail_closed() {
             parse(Variables {
                 accepting: flag,
                 sites: &rows,
-                sender: "forms@notify.example.com",
                 network: "{}",
                 site_networks: "{}"
             })
             .is_err()
         )
     }
+    let mut injected = entries();
+    injected[0]["from"] = json!("attacker@example.com");
     assert!(
         parse(Variables {
             accepting: "true",
-            sites: &rows,
-            sender: "",
+            sites: &injected.to_string(),
             network: "{}",
             site_networks: "{}"
         })
@@ -62,7 +59,6 @@ fn global_deny_is_not_overridden_by_site_allow() {
     let c = parse(Variables {
         accepting: "true",
         sites: &rows,
-        sender: "forms@notify.example.com",
         network: r#"{"deniedCidrs":["203.0.113.0/24"]}"#,
         site_networks: r#"{"first":{"allowedCidrs":["203.0.113.9/32"]}}"#,
     })
@@ -85,7 +81,6 @@ fn network_typos_unknown_sites_and_invalid_types_reject_configuration() {
             parse(Variables {
                 accepting: "true",
                 sites: &rows,
-                sender: "forms@notify.example.com",
                 network: global,
                 site_networks: per_site
             })
@@ -111,7 +106,6 @@ fn thirteen_sites_fit_each_variable_even_with_policy_commits() {
         parse(Variables {
             accepting: "true",
             sites: &text,
-            sender: "forms@notify.example.com",
             network: "{}",
             site_networks: "{}"
         })
@@ -138,7 +132,6 @@ fn email_modes_are_server_owned_and_default_to_required() {
         let c = parse(Variables {
             accepting: "true",
             sites: &text,
-            sender: "forms@notify.example.com",
             network: "{}",
             site_networks: "{}",
         })
@@ -160,7 +153,6 @@ fn email_modes_are_server_owned_and_default_to_required() {
         parse(Variables {
             accepting: "true",
             sites: &rows.to_string(),
-            sender: "forms@notify.example.com",
             network: "{}",
             site_networks: "{}"
         })

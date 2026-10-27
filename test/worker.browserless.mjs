@@ -11,11 +11,18 @@ async function request(mode='normal',patch={},options={}){
  return {status:response.status,body:await response.json(),headers:response.headers}
 }
 try{
- for(const [mode,status,verify]of[['normal',202,1],['disabled',403,0],['all-disabled',403,0],['global-denied',403,0],['vars-object',503,0],['missing-flag',503,0],['missing',503,0],['missing-secret',503,0],['no-ip',403,0],['no-cf',403,0],['redirect',503,1],['huge-verification',503,1],['config',503,0],['denied',403,0],['rate',429,0],['failed',403,1],['hostname',403,1],['action',403,1],['expired',403,1],['unknown',503,1]]){
+ for(const [mode,status,verify]of[['normal',202,1],['disabled',403,0],['all-disabled',403,0],['global-denied',403,0],['vars-object',503,0],['missing-flag',503,0],['missing',503,0],['bad-graph-identity',503,0],['bad-graph-secret',503,0],['missing-secret',503,0],['no-ip',403,0],['no-cf',403,0],['redirect',503,1],['huge-verification',503,1],['config',503,0],['denied',403,0],['rate',429,0],['failed',403,1],['hostname',403,1],['action',403,1],['expired',403,1],['unknown',503,1]]){
   const r=await request(mode);assert.equal(r.status,status,JSON.stringify({mode,...r}));assert.equal(r.body.calls.verify,verify)
   if(['disabled','all-disabled','global-denied','vars-object','missing-flag'].includes(mode))assert.equal(r.body.calls.limit,0)
-  assert.equal(r.body.calls.email.length,['normal','unknown'].includes(mode)?1:0);checks++
+  assert.equal(r.body.calls.email.length,['normal','unknown'].includes(mode)?1:0);assert.equal(r.body.calls.token,['normal','unknown'].includes(mode)?1:0);checks++
   if(mode==='normal'){const m=r.body.calls.email[0];assert.equal(m.to,'contact@hat-tech.co.jp');assert.equal(m.replyTo,'person@example.com');assert.equal(m.html,undefined);assert.equal(r.headers.get('cache-control'),'no-store')}
+ }
+ for(const mode of ['token-error','token-redirect','token-huge','token-invalid','graph-redirect','graph-reject']){
+  const id=crypto.randomUUID(),r=await request(mode,{submissionId:id});assert.equal(r.status,503,mode)
+  assert.equal(r.body.code,'outcome_unknown_do_not_resend');assert.equal(r.body.calls.token,1)
+  assert.equal(r.body.calls.email.length,mode.startsWith('graph-')?1:0)
+  assert.ok(!JSON.stringify(r.body).includes('must not leak'))
+  const duplicate=await request('normal',{submissionId:id});assert.equal(duplicate.status,409);assert.equal(duplicate.body.calls.token,0);assert.equal(duplicate.body.calls.email.length,0);checks++
  }
  for(const mode of ['normal','coela-disabled']){
   const r=await request(mode,{siteKey:'coela'},{headers:{origin:'https://coela.org','content-type':'application/json','x-test-mode':mode}})

@@ -21,7 +21,7 @@ pub async fn submit(
     }
     let limiter = env.rate_limiter("LIMITER")?;
     let receipts = env.durable_object("RECEIPTS_NAMESPACE")?;
-    let email = env.send_email("EMAIL")?;
+    let graph = crate::graph::Graph::from_env(env)?;
     let media = req
         .headers()
         .get("content-type")?
@@ -96,5 +96,5 @@ pub async fn submit(
     {
         return reply(400, "invalid_submission", o);
     }
-    crate::delivery::deliver(site, &input, &secret, receipts, email).await
+    crate::delivery::deliver(site, &input, &secret, receipts, graph).await
 }

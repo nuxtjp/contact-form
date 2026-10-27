@@ -6,6 +6,10 @@ mod delivery;
 #[cfg(target_arch = "wasm32")]
 mod edge;
 #[cfg(target_arch = "wasm32")]
+mod graph;
+#[cfg(target_arch = "wasm32")]
+mod graph_http;
+#[cfg(target_arch = "wasm32")]
 mod io;
 pub mod network;
 #[cfg(target_arch = "wasm32")]

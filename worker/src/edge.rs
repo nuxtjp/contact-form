@@ -17,18 +17,15 @@ async fn handle(req: &mut Request, env: &Env, origin: &mut Option<String>) -> Re
     let values = [
         "CONTACT_ACCEPTING",
         "CONTACT_SITES_JSON",
-        "CONTACT_MAIL_FROM",
         "CONTACT_NETWORK_JSON",
         "CONTACT_SITE_NETWORKS_JSON",
     ]
     .map(|key| env.var(key).map(|v| v.to_string()));
-    let [accepting, sites, sender, network, site_networks] = values;
-    let (accepting, sites, sender, network, site_networks) =
-        (accepting?, sites?, sender?, network?, site_networks?);
+    let [accepting, sites, network, site_networks] = values;
+    let (accepting, sites, network, site_networks) = (accepting?, sites?, network?, site_networks?);
     let settings = config::parse(config::Variables {
         accepting: &accepting,
         sites: &sites,
-        sender: &sender,
         network: &network,
         site_networks: &site_networks,
     })
